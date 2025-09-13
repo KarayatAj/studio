@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, FormEvent } from 'react';
 import {
   Card,
   CardContent,
@@ -23,8 +23,8 @@ export default function JournalEntryForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
 
-  // This function will be called by the form's action.
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!user) {
       toast({
         variant: 'destructive',
@@ -33,6 +33,19 @@ export default function JournalEntryForm() {
       });
       return;
     }
+
+    const formData = new FormData(e.currentTarget);
+    const text = formData.get('entry') as string;
+
+    if (!text || text.trim().length === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Journal entry cannot be empty.',
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -52,14 +65,15 @@ export default function JournalEntryForm() {
         });
       }
     } catch (error) {
-        console.error('Form submission error:', error);
-        toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'An unexpected error occurred.',
-        });
+      console.error('Form submission error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description:
+          error instanceof Error ? error.message : 'An unexpected error occurred.',
+      });
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -76,7 +90,7 @@ export default function JournalEntryForm() {
           </div>
         </div>
       </CardHeader>
-      <form ref={formRef} action={handleSubmit}>
+      <form ref={formRef} onSubmit={handleSubmit}>
         <CardContent>
           <Textarea
             name="entry"
