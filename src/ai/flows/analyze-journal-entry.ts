@@ -37,8 +37,8 @@ const prompt = ai.definePrompt({
   name: 'analyzeJournalEntryPrompt',
   input: {schema: AnalyzeJournalEntryInputSchema},
   output: {schema: AnalyzeJournalEntryOutputSchema},
-  prompt: `You are an expert in analyzing journal entries. Your task is to analyze the following journal entry and return a JSON object.
-The JSON object should have two keys: "reflectionScore" (a number between 0 and 100) and "dominantEmotions" (an array of strings).
+  prompt: `You are an expert in analyzing journal entries. Your task is to analyze the following journal entry and return ONLY a valid JSON object. Do not include any extra text, markdown, or commentary.
+The JSON object must have two keys: "reflectionScore" (a number between 0 and 100) and "dominantEmotions" (an array of strings).
 
 Journal Entry:
 "{{{text}}}"
