@@ -23,10 +23,10 @@ export async function submitJournalEntry(userId: string, formData: FormData) {
   const text = formData.get('entry') as string;
 
   if (!userId) {
-    throw new Error('User not authenticated');
+    return { success: false, message: 'User not authenticated' };
   }
   if (!text || text.trim().length === 0) {
-    throw new Error('Journal entry cannot be empty');
+    return { success: false, message: 'Journal entry cannot be empty' };
   }
 
   try {
