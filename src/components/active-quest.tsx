@@ -58,7 +58,7 @@ export default function ActiveQuest() {
   const handleComplete = async () => {
     if (!activeQuest || !user) return;
     setIsCompleting(true);
-    const result = await completeQuest(activeQuest.id, user);
+    const result = await completeQuest(activeQuest.id, user.uid);
     toast({ title: result.success ? 'Success' : 'Error', description: result.message, variant: result.success ? 'default' : 'destructive'});
     setIsCompleting(false);
   };
@@ -66,7 +66,7 @@ export default function ActiveQuest() {
   const handleGenerate = async () => {
     if(!user) return;
     setIsGenerating(true);
-    const result = await generateNewQuest(user);
+    const result = await generateNewQuest(user.uid);
     toast({ title: result.success ? 'Success' : 'Error', description: result.message, variant: result.success ? 'default' : 'destructive'});
     setIsGenerating(false);
   };

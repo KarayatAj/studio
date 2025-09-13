@@ -33,7 +33,7 @@ export default function JournalEntryForm() {
       return;
     }
     setIsLoading(true);
-    const result = await submitJournalEntry(formData, user);
+    const result = await submitJournalEntry(formData, user.uid);
     if (result.success) {
       toast({
         title: 'Success',

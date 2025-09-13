@@ -18,11 +18,9 @@ import {
   limit
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { User } from 'firebase/auth';
 
-export async function submitJournalEntry(formData: FormData, user: User) {
+export async function submitJournalEntry(formData: FormData, userId: string) {
   const text = formData.get('entry') as string;
-  const userId = user?.uid;
 
   if (!userId) {
     throw new Error('User not authenticated');
@@ -48,8 +46,7 @@ export async function submitJournalEntry(formData: FormData, user: User) {
   }
 }
 
-export async function generateNewQuest(user: User) {
-  const userId = user?.uid;
+export async function generateNewQuest(userId: string) {
   if (!userId) throw new Error('User not authenticated');
 
   try {
@@ -97,8 +94,7 @@ export async function generateNewQuest(user: User) {
   }
 }
 
-export async function completeQuest(questId: string, user: User) {
-  const userId = user?.uid;
+export async function completeQuest(questId: string, userId: string) {
   if (!userId) throw new Error('User not authenticated');
 
   try {
