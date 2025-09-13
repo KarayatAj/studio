@@ -56,16 +56,17 @@ export default function ActiveQuest() {
   }, [user]);
 
   const handleComplete = async () => {
-    if (!activeQuest) return;
+    if (!activeQuest || !user) return;
     setIsCompleting(true);
-    const result = await completeQuest(activeQuest.id);
+    const result = await completeQuest(activeQuest.id, user);
     toast({ title: result.success ? 'Success' : 'Error', description: result.message, variant: result.success ? 'default' : 'destructive'});
     setIsCompleting(false);
   };
 
   const handleGenerate = async () => {
+    if(!user) return;
     setIsGenerating(true);
-    const result = await generateNewQuest();
+    const result = await generateNewQuest(user);
     toast({ title: result.success ? 'Success' : 'Error', description: result.message, variant: result.success ? 'default' : 'destructive'});
     setIsGenerating(false);
   };
@@ -100,14 +101,14 @@ export default function ActiveQuest() {
         <Button
           variant="outline"
           onClick={handleGenerate}
-          disabled={isGenerating || isCompleting}
+          disabled={isGenerating || isCompleting || !user}
         >
           {isGenerating && <LoadingSpinner className="mr-2 h-4 w-4" />}
           <Sparkles className="mr-2 h-4 w-4" />
           New Quest
         </Button>
         {activeQuest && (
-          <Button onClick={handleComplete} disabled={isCompleting || isGenerating}>
+          <Button onClick={handleComplete} disabled={isCompleting || isGenerating || !user}>
             {isCompleting && <LoadingSpinner className="mr-2 h-4 w-4" />}
             Complete Quest
           </Button>

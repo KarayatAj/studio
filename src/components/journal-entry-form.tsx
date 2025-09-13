@@ -14,16 +14,26 @@ import { Textarea } from '@/components/ui/textarea';
 import { submitJournalEntry } from '@/app/actions';
 import LoadingSpinner from './loading-spinner';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 import { BookText } from 'lucide-react';
 
 export default function JournalEntryForm() {
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
 
   const handleFormSubmit = async (formData: FormData) => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'You must be logged in to save an entry.',
+      });
+      return;
+    }
     setIsLoading(true);
-    const result = await submitJournalEntry(formData);
+    const result = await submitJournalEntry(formData, user);
     if (result.success) {
       toast({
         title: 'Success',
@@ -63,7 +73,7 @@ export default function JournalEntryForm() {
           />
         </CardContent>
         <CardFooter className="flex justify-end">
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading || !user}>
             {isLoading && <LoadingSpinner className="mr-2 h-4 w-4" />}
             Save Entry
           </Button>
