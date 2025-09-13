@@ -34,25 +34,33 @@ export default function JournalEntryForm() {
       return;
     }
     setIsLoading(true);
-    
-    // Bind the userId to the server action before calling it.
-    const submitJournalEntryWithUser = submitJournalEntry.bind(null, user.uid);
-    const result = await submitJournalEntryWithUser(formData);
 
-    if (result.success) {
-      toast({
-        title: 'Success',
-        description: result.message,
-      });
-      formRef.current?.reset();
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: result.message,
-      });
+    try {
+      const result = await submitJournalEntry(user.uid, formData);
+
+      if (result.success) {
+        toast({
+          title: 'Success',
+          description: result.message,
+        });
+        formRef.current?.reset();
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: result.message,
+        });
+      }
+    } catch (error) {
+        console.error('Form submission error:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'An unexpected error occurred.',
+        });
+    } finally {
+        setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
