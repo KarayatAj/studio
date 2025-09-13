@@ -20,17 +20,16 @@ import {
   orderBy,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { completeQuest, generateNewQuest } from '@/app/actions';
+import { completeQuest } from '@/app/actions';
 import LoadingSpinner from './loading-spinner';
 import { useToast } from '@/hooks/use-toast';
-import { Compass, Sparkles } from 'lucide-react';
+import { Compass } from 'lucide-react';
 
 export default function ActiveQuest() {
   const { user } = useAuth();
   const [activeQuest, setActiveQuest] = useState<UserQuest | null>(null);
   const [loading, setLoading] = useState(true);
   const [isCompleting, setIsCompleting] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -63,14 +62,6 @@ export default function ActiveQuest() {
     setIsCompleting(false);
   };
 
-  const handleGenerate = async () => {
-    if(!user) return;
-    setIsGenerating(true);
-    const result = await generateNewQuest(user.uid);
-    toast({ title: result.success ? 'Success' : 'Error', description: result.message, variant: result.success ? 'default' : 'destructive'});
-    setIsGenerating(false);
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -93,22 +84,13 @@ export default function ActiveQuest() {
           <p className="text-lg text-foreground italic">"{activeQuest.questText}"</p>
         ) : (
           <p className="text-muted-foreground">
-            No active quest. Generate a new one to get started!
+            Complete a journal entry to generate your first quest!
           </p>
         )}
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
-        <Button
-          variant="outline"
-          onClick={handleGenerate}
-          disabled={isGenerating || isCompleting || !user}
-        >
-          {isGenerating && <LoadingSpinner className="mr-2 h-4 w-4" />}
-          <Sparkles className="mr-2 h-4 w-4" />
-          New Quest
-        </Button>
         {activeQuest && (
-          <Button onClick={handleComplete} disabled={isCompleting || isGenerating || !user}>
+          <Button onClick={handleComplete} disabled={isCompleting || !user}>
             {isCompleting && <LoadingSpinner className="mr-2 h-4 w-4" />}
             Complete Quest
           </Button>

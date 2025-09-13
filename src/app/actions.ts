@@ -37,6 +37,8 @@ export async function submitJournalEntry(userId: string, formData: FormData) {
       date: serverTimestamp(),
       ...analysis,
     });
+    
+    await generateNewQuest(userId);
 
     revalidatePath('/');
     return { success: true, message: 'Journal entry saved.' };
@@ -56,11 +58,10 @@ export async function generateNewQuest(userId: string) {
       where('status', '==', 'in_progress')
     );
     const inProgressQuests = await getDocs(questsQuery);
-    const batch = [];
-    for (const questDoc of inProgressQuests.docs) {
-      batch.push(updateDoc(doc(db, 'users', userId, 'user_quests', questDoc.id), { status: 'completed' }));
+    // If there is an in-progress quest, do not generate a new one.
+    if (!inProgressQuests.empty) {
+        return { success: true, message: 'An active quest already exists.'}
     }
-    await Promise.all(batch);
 
 
     const entriesQuery = query(
