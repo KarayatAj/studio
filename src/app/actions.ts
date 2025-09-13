@@ -18,9 +18,7 @@ import { db } from '@/lib/firebase';
 import { format } from 'date-fns';
 import { generateWeeklyQuest } from '@/ai/flows/generate-weekly-quest';
 
-export async function submitJournalEntry(userId: string, formData: FormData) {
-  const text = formData.get('entry') as string;
-
+export async function submitJournalEntry(userId: string, text: string) {
   if (!userId) {
     return { success: false, message: 'User not authenticated' };
   }
@@ -32,7 +30,6 @@ export async function submitJournalEntry(userId: string, formData: FormData) {
   }
 
   try {
-    // Save the entry directly to the database.
     await addDoc(collection(db, 'users', userId, 'journal_entries'), {
       text,
       date: serverTimestamp(),
@@ -60,6 +57,15 @@ export async function generateNewQuest(userId: string) {
   if (!userId) throw new Error('User not authenticated');
 
   try {
+    const questsQuery = query(
+      collection(db, 'users', userId, 'user_quests'),
+      where('status', '==', 'in_progress')
+    );
+    const existingQuests = await getDocs(questsQuery);
+    if (!existingQuests.empty) {
+      return; // A quest is already in progress
+    }
+
     const entriesQuery = query(
       collection(db, 'users', userId, 'journal_entries'),
       orderBy('date', 'desc'),

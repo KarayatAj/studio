@@ -21,6 +21,7 @@ export default function JournalEntryForm() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -34,8 +35,7 @@ export default function JournalEntryForm() {
       return;
     }
 
-    const formData = new FormData(e.currentTarget);
-    const text = formData.get('entry') as string;
+    const text = textareaRef.current?.value;
 
     if (!text || text.trim().length === 0) {
       toast({
@@ -49,7 +49,7 @@ export default function JournalEntryForm() {
     setIsLoading(true);
 
     try {
-      const result = await submitJournalEntry(user.uid, formData);
+      const result = await submitJournalEntry(user.uid, text);
 
       if (result.success) {
         toast({
@@ -92,6 +92,7 @@ export default function JournalEntryForm() {
       <form ref={formRef} onSubmit={handleSubmit}>
         <CardContent>
           <Textarea
+            ref={textareaRef}
             name="entry"
             placeholder="Let your thoughts flow..."
             className="min-h-[120px] resize-none"
