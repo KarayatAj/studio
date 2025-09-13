@@ -37,17 +37,12 @@ const prompt = ai.definePrompt({
   name: 'analyzeJournalEntryPrompt',
   input: {schema: AnalyzeJournalEntryInputSchema},
   output: {schema: AnalyzeJournalEntryOutputSchema},
-  prompt: `Analyze the following journal entry text and provide a reflection score (0-100) and a list of dominant emotions.
+  prompt: `You are an expert in analyzing journal entries. Your task is to analyze the following journal entry and return a JSON object.
+The JSON object should have two keys: "reflectionScore" (a number between 0 and 100) and "dominantEmotions" (an array of strings).
 
-Journal Entry Text:
-{{{text}}}
-
-User ID:
-{{{userId}}}
-
-Respond in JSON format.
-Reflection Score: 
-Dominant Emotions:`, 
+Journal Entry:
+"{{{text}}}"
+`,
 });
 
 const analyzeJournalEntryFlow = ai.defineFlow(
