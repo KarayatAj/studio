@@ -19,7 +19,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-export async function submitJournalEntry(formData: FormData, userId: string) {
+export async function submitJournalEntry(userId: string, formData: FormData) {
   const text = formData.get('entry') as string;
 
   if (!userId) {

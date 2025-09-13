@@ -23,7 +23,8 @@ export default function JournalEntryForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
 
-  const handleFormSubmit = async (formData: FormData) => {
+  // This function will be called by the form's action.
+  const handleSubmit = async (formData: FormData) => {
     if (!user) {
       toast({
         variant: 'destructive',
@@ -33,7 +34,11 @@ export default function JournalEntryForm() {
       return;
     }
     setIsLoading(true);
-    const result = await submitJournalEntry(formData, user.uid);
+    
+    // Bind the userId to the server action before calling it.
+    const submitJournalEntryWithUser = submitJournalEntry.bind(null, user.uid);
+    const result = await submitJournalEntryWithUser(formData);
+
     if (result.success) {
       toast({
         title: 'Success',
@@ -63,13 +68,13 @@ export default function JournalEntryForm() {
           </div>
         </div>
       </CardHeader>
-      <form ref={formRef} action={handleFormSubmit}>
+      <form ref={formRef} action={handleSubmit}>
         <CardContent>
           <Textarea
             name="entry"
             placeholder="Let your thoughts flow..."
             className="min-h-[120px] resize-none"
-            disabled={isLoading}
+            disabled={isLoading || !user}
           />
         </CardContent>
         <CardFooter className="flex justify-end">
