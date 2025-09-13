@@ -38,7 +38,16 @@ export async function submitJournalEntry(userId: string, formData: FormData) {
       ...analysis,
     });
     
-    await generateNewQuest(userId);
+    // Check if there is an active quest before generating a new one.
+    const questsQuery = query(
+      collection(db, 'users', userId, 'user_quests'),
+      where('status', '==', 'in_progress')
+    );
+    const inProgressQuests = await getDocs(questsQuery);
+
+    if (inProgressQuests.empty) {
+      await generateNewQuest(userId);
+    }
 
     revalidatePath('/');
     return { success: true, message: 'Journal entry saved.' };
@@ -52,32 +61,22 @@ export async function generateNewQuest(userId: string) {
   if (!userId) throw new Error('User not authenticated');
 
   try {
-    // Mark any existing in_progress quests as completed
-    const questsQuery = query(
-      collection(db, 'users', userId, 'user_quests'),
-      where('status', '==', 'in_progress')
-    );
-    const inProgressQuests = await getDocs(questsQuery);
-    // If there is an in-progress quest, do not generate a new one.
-    if (!inProgressQuests.empty) {
-        return { success: true, message: 'An active quest already exists.'}
-    }
-
-
     const entriesQuery = query(
       collection(db, 'users', userId, 'journal_entries'),
       orderBy('date', 'desc'),
       limit(7)
     );
     const entryDocs = await getDocs(entriesQuery);
+    if (entryDocs.docs.length === 0) {
+      // Not enough entries, so we just return without error
+      return; 
+    }
+    
     const journalEntries = entryDocs.docs.map(d => ({
         text: d.data().text,
         date: (d.data().date as Timestamp).toDate().toISOString()
     }));
 
-    if (journalEntries.length === 0) {
-      return { success: false, message: 'Not enough journal entries to generate a quest.' };
-    }
 
     const result = await generateWeeklyQuest({ userId, journalEntries });
 
@@ -88,10 +87,9 @@ export async function generateNewQuest(userId: string) {
     });
 
     revalidatePath('/');
-    return { success: true, message: 'New quest generated!' };
   } catch (error) {
     console.error('Error generating new quest:', error);
-    return { success: false, message: 'Failed to generate new quest.' };
+    // We don't want to throw an error here that would fail the whole submission
   }
 }
 
