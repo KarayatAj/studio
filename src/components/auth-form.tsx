@@ -63,6 +63,10 @@ export default function AuthForm() {
           appId: '__app_id',
           createdAt: serverTimestamp(),
         });
+        toast({
+            title: 'Success!',
+            description: 'Your account has been created.',
+        });
         router.push('/');
       }
     } catch (error: any) {
@@ -72,9 +76,8 @@ export default function AuthForm() {
         title: 'Authentication Failed',
         description: error.message || 'An unexpected error occurred.',
       });
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   return (
