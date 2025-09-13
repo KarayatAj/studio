@@ -13,12 +13,7 @@ import {z} from 'genkit';
 
 const GenerateWeeklyQuestInputSchema = z.object({
   userId: z.string().describe('The ID of the user.'),
-  journalEntries: z.array(
-    z.object({
-      text: z.string().describe('The user\'s journal entry.'),
-      date: z.string().describe('The date of the entry.'),
-    })
-  ).describe('The user\'s journal entries from the past week.'),
+  formattedJournalEntries: z.string().describe('A formatted string of the user\'s journal entries from the past week.'),
 });
 export type GenerateWeeklyQuestInput = z.infer<typeof GenerateWeeklyQuestInputSchema>;
 
@@ -35,7 +30,7 @@ const prompt = ai.definePrompt({
   name: 'generateWeeklyQuestPrompt',
   input: {schema: GenerateWeeklyQuestInputSchema},
   output: {schema: GenerateWeeklyQuestOutputSchema},
-  prompt: `You are a personal growth coach. Analyze the following journal entries from the past week to identify recurring patterns and generate a single, actionable "quest" to help the user grow.\n\nJournal Entries:\n{{#each journalEntries}}\nDate: {{{date}}}\nEntry: {{{text}}}\n{{/each}}\n\nQuest:`,
+  prompt: `You are a personal growth coach. Analyze the following journal entries from the past week to identify recurring patterns and generate a single, actionable "quest" to help the user grow.\n\nJournal Entries:\n{{{formattedJournalEntries}}}\n\nQuest:`,
 });
 
 const generateWeeklyQuestFlow = ai.defineFlow(

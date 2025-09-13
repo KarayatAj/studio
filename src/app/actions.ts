@@ -1,6 +1,5 @@
 'use server';
 
-import { auth } from '@/lib/firebase';
 import { analyzeJournalEntry } from '@/ai/flows/analyze-journal-entry';
 import { generateWeeklyQuest } from '@/ai/flows/generate-weekly-quest';
 import { revalidatePath } from 'next/cache';
@@ -18,6 +17,7 @@ import {
   limit
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { format } from 'date-fns';
 
 export async function submitJournalEntry(userId: string, formData: FormData) {
   const text = formData.get('entry') as string;
@@ -38,7 +38,6 @@ export async function submitJournalEntry(userId: string, formData: FormData) {
       ...analysis,
     });
     
-    // Check if there is an active quest before generating a new one.
     const questsQuery = query(
       collection(db, 'users', userId, 'user_quests'),
       where('status', '==', 'in_progress')
@@ -53,7 +52,8 @@ export async function submitJournalEntry(userId: string, formData: FormData) {
     return { success: true, message: 'Journal entry saved.' };
   } catch (error) {
     console.error('Error submitting journal entry:', error);
-    return { success: false, message: 'Failed to save journal entry.' };
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.';
+    return { success: false, message: `Failed to save journal entry. ${errorMessage}` };
   }
 }
 
@@ -68,23 +68,25 @@ export async function generateNewQuest(userId: string) {
     );
     const entryDocs = await getDocs(entriesQuery);
     if (entryDocs.docs.length === 0) {
-      // Not enough entries, so we just return without error
       return; 
     }
     
-    const journalEntries = entryDocs.docs.map(d => ({
-        text: d.data().text,
-        date: (d.data().date as Timestamp).toDate().toISOString()
-    }));
+    const formattedJournalEntries = entryDocs.docs.map(d => {
+        const entryData = d.data();
+        const date = (entryData.date as Timestamp).toDate();
+        return `Date: ${format(date, 'yyyy-MM-dd')}\nEntry: ${entryData.text}`;
+    }).join('\n\n');
 
 
-    const result = await generateWeeklyQuest({ userId, journalEntries });
+    const result = await generateWeeklyQuest({ userId, formattedJournalEntries });
 
-    await addDoc(collection(db, 'users', userId, 'user_quests'), {
-      questText: result.questText,
-      status: 'in_progress',
-      createdAt: serverTimestamp(),
-    });
+    if (result.questText) {
+      await addDoc(collection(db, 'users', userId, 'user_quests'), {
+        questText: result.questText,
+        status: 'in_progress',
+        createdAt: serverTimestamp(),
+      });
+    }
 
     revalidatePath('/');
   } catch (error) {
