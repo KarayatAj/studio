@@ -23,19 +23,13 @@ export async function submitJournalEntry(userId: string, formData: FormData) {
   const text = formData.get('entry') as string;
 
   if (!userId) {
-    return new Response(
-      JSON.stringify({ success: false, message: 'User not authenticated' }),
-      { status: 401 }
-    );
+    return { success: false, message: 'User not authenticated' };
   }
   if (!text || text.trim().length === 0) {
-    return new Response(
-      JSON.stringify({
-        success: false,
-        message: 'Journal entry cannot be empty',
-      }),
-      { status: 400 }
-    );
+    return {
+      success: false,
+      message: 'Journal entry cannot be empty',
+    };
   }
 
   try {
@@ -49,24 +43,18 @@ export async function submitJournalEntry(userId: string, formData: FormData) {
     });
 
     revalidatePath('/');
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: 'Your response has been received.',
-      }),
-      { status: 200 }
-    );
+    return {
+      success: true,
+      message: 'Your response has been received.',
+    };
   } catch (error) {
     console.error('Error submitting journal entry:', error);
     const errorMessage =
       error instanceof Error ? error.message : 'An unexpected error occurred.';
-    return new Response(
-      JSON.stringify({
-        success: false,
-        message: `Failed to save journal entry. ${errorMessage}`,
-      }),
-      { status: 500 }
-    );
+    return {
+      success: false,
+      message: `Failed to save journal entry. ${errorMessage}`,
+    };
   }
 }
 

@@ -49,8 +49,7 @@ export default function JournalEntryForm() {
     setIsLoading(true);
 
     try {
-      const response = await submitJournalEntry(user.uid, formData);
-      const result = await response.json();
+      const result = await submitJournalEntry(user.uid, formData);
 
       if (result.success) {
         toast({
