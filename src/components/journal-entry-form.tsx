@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, FormEvent } from 'react';
+import { useRef, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -23,7 +23,7 @@ export default function JournalEntryForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) {
       toast({
@@ -49,7 +49,8 @@ export default function JournalEntryForm() {
     setIsLoading(true);
 
     try {
-      const result = await submitJournalEntry(user.uid, formData);
+      const response = await submitJournalEntry(user.uid, formData);
+      const result = await response.json();
 
       if (result.success) {
         toast({
@@ -69,8 +70,7 @@ export default function JournalEntryForm() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'An unexpected error occurred.',
+        description: 'An unexpected error occurred. Please try again.',
       });
     } finally {
       setIsLoading(false);

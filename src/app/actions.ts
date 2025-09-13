@@ -23,45 +23,50 @@ export async function submitJournalEntry(userId: string, formData: FormData) {
   const text = formData.get('entry') as string;
 
   if (!userId) {
-    return { success: false, message: 'User not authenticated' };
+    return new Response(
+      JSON.stringify({ success: false, message: 'User not authenticated' }),
+      { status: 401 }
+    );
   }
   if (!text || text.trim().length === 0) {
-    return { success: false, message: 'Journal entry cannot be empty' };
+    return new Response(
+      JSON.stringify({
+        success: false,
+        message: 'Journal entry cannot be empty',
+      }),
+      { status: 400 }
+    );
   }
 
   try {
-    // Temporarily bypass AI analysis to debug form submission
-    // const analysis = await analyzeJournalEntry({ text, userId });
-
+    // The AI analysis and quest generation are temporarily bypassed.
+    // We will save the entry directly to the database.
     await addDoc(collection(db, 'users', userId, 'journal_entries'), {
       text,
       date: serverTimestamp(),
-      // Use placeholder values since AI call is removed
-      reflectionScore: 0,
-      dominantEmotions: [],
+      reflectionScore: 0, // Placeholder value
+      dominantEmotions: [], // Placeholder value
     });
 
-    // Temporarily bypass quest generation
-    // const questsQuery = query(
-    //   collection(db, 'users', userId, 'user_quests'),
-    //   where('status', '==', 'in_progress')
-    // );
-    // const inProgressQuests = await getDocs(questsQuery);
-
-    // if (inProgressQuests.empty) {
-    //   await generateNewQuest(userId);
-    // }
-
     revalidatePath('/');
-    return { success: true, message: 'Your response has been received.' };
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: 'Your response has been received.',
+      }),
+      { status: 200 }
+    );
   } catch (error) {
     console.error('Error submitting journal entry:', error);
     const errorMessage =
       error instanceof Error ? error.message : 'An unexpected error occurred.';
-    return {
-      success: false,
-      message: `Failed to save journal entry. ${errorMessage}`,
-    };
+    return new Response(
+      JSON.stringify({
+        success: false,
+        message: `Failed to save journal entry. ${errorMessage}`,
+      }),
+      { status: 500 }
+    );
   }
 }
 
