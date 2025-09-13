@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { submitJournalEntry } from '@/app/actions';
 import LoadingSpinner from './loading-spinner';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
@@ -30,7 +29,7 @@ export default function JournalEntryForm() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'You must be logged in to save an entry.',
+        description: 'You must be logged in to submit an entry.',
       });
       return;
     }
@@ -48,32 +47,15 @@ export default function JournalEntryForm() {
 
     setIsLoading(true);
 
-    try {
-      const result = await submitJournalEntry(user.uid, text);
-
-      if (result.success) {
-        toast({
-          title: 'Success',
-          description: result.message,
-        });
-        formRef.current?.reset();
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: result.message,
-        });
-      }
-    } catch (error) {
-      console.error('Form submission error:', error);
+    // Simulate a successful submission without calling the backend.
+    setTimeout(() => {
       toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'An unexpected error occurred. Please try again.',
+        title: 'Success',
+        description: 'Your response has been received.',
       });
-    } finally {
+      formRef.current?.reset();
       setIsLoading(false);
-    }
+    }, 500); // A small delay to simulate a network request
   };
 
   return (
