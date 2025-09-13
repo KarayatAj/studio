@@ -1,7 +1,5 @@
 'use server';
 
-import { analyzeJournalEntry } from '@/ai/flows/analyze-journal-entry';
-import { generateWeeklyQuest } from '@/ai/flows/generate-weekly-quest';
 import { revalidatePath } from 'next/cache';
 import {
   addDoc,
@@ -18,6 +16,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { format } from 'date-fns';
+import { generateWeeklyQuest } from '@/ai/flows/generate-weekly-quest';
 
 export async function submitJournalEntry(userId: string, formData: FormData) {
   const text = formData.get('entry') as string;
@@ -33,8 +32,7 @@ export async function submitJournalEntry(userId: string, formData: FormData) {
   }
 
   try {
-    // The AI analysis and quest generation are temporarily bypassed.
-    // We will save the entry directly to the database.
+    // Save the entry directly to the database.
     await addDoc(collection(db, 'users', userId, 'journal_entries'), {
       text,
       date: serverTimestamp(),
