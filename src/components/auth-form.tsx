@@ -64,20 +64,40 @@ export default function AuthForm() {
           createdAt: serverTimestamp(),
         });
         toast({
-            title: 'Success!',
-            description: 'Your account has been created.',
+          title: 'Success!',
+          description: 'Your account has been created.',
         });
         router.push('/');
       }
     } catch (error: any) {
       console.error(error);
+      let errorMessage = 'An unexpected error occurred.';
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/invalid-credential':
+          case 'auth/wrong-password':
+          case 'auth/user-not-found':
+            errorMessage = 'Invalid email or password. Please try again.';
+            break;
+          case 'auth/email-already-in-use':
+            errorMessage =
+              'This email is already in use. Please log in or use a different email.';
+            break;
+          case 'auth/weak-password':
+            errorMessage = 'The password is too weak. Please use a stronger password.';
+            break;
+          default:
+            errorMessage = error.message;
+        }
+      }
       toast({
         variant: 'destructive',
         title: 'Authentication Failed',
-        description: error.message || 'An unexpected error occurred.',
+        description: errorMessage,
       });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
